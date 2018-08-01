@@ -1,4 +1,4 @@
-
+#!/usr/bin/env python
 #plot_coarse_channel.py fnameIN fFreq fnameOUT
 import time
 start_time = time.time()
@@ -10,6 +10,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pdb
 import cProfile
+
+import requant_utils
 
 if len(sys.argv) != 4:
         print '\nmissing information\n'
@@ -168,82 +170,16 @@ for fname in all_filenames:
                                 currline = teststr
                         output_file.write(currline)
                 fread.seek(nblock*(nHeaderLines*80+nPadd+nblocsize)+nHeaderLines*80+nPadd+nChanOI*nChanSize)
-                tmpdata = fread.read(int(nChanSize))    # read data block
 
+                in_8i  = np.fromfile(fread, count=int(nChanSize), dtype='int8')
+                out_2u = np.zeros(in_8i.shape[0] / 4, dtype='uint8')
 
-                val_array = []
-                for i in range(len(tmpdata)):
-                        value = ord(tmpdata[i])
-                        if value > 127:
-                                val = value - 256
-                        if value <= 127:
-                                val = value
-                        val_array.append(val)
+                requant_utils.requant_8i_2u(in_8i, out_2u)
 
-#               z = np.std(val_np)
-#               print z
-#               stddev_array = [1,1]
-                n = 256*1024*2
-                real = val_array[0:n:2]  #takes every even-indexed value from 0-256K*2
-                imaginary = val_array[1:n:2]    #takes every odd-indexed value
-                re_array = np.asarray(real)
-                im_array = np.asarray(imaginary)
-
-                stddev_re = np.std(re_array)
-                stddev_im = np.std(im_array)
-                print stddev_re
-                print stddev_im
-
-                # Real 2-bitting
-                for index in range(0,len(val_array)-1,2):
-                        if val_array[index] < -0.98159883*stddev_re:
-                                val_array[index] = 0
-                        elif val_array[index] < 0:
-                                val_array[index] = 1
-                        elif val_array[index] < 0.98159883*stddev_re:
-                                val_array[index] = 2
-                        else:
-                                val_array[index] = 3
-
-                # Imaginary 2-bitting
-                for index in range(1,len(val_array)-1,2):
-                        if val_array[index] < -0.98159883*stddev_im:
-                                val_array[index] = 0
-                        elif val_array[index] < 0:
-                                val_array[index] = 1
-                        elif val_array[index] < 0.98159883*stddev_im:
-                                val_array[index] = 2
-                        else:
-                                val_array[index] = 3
-
-
-                num_samples = np.size(val_array)
-                bitted_list = []
-                for y in range(num_samples/4):
-                        bitted_list.append(val_array[y] + (val_array[y+1] * 4) + (val_array[y+2] * 16) + (val_array[y+3] * 64))
-
-#               bitted_string = ''.join(str(e) for e in bitted_list)
-                bitted_string = ''.join(chr(e) for e in bitted_list)
-
-#               stddev_array = [i*n for i in stddev_array]
-#               print stddev_array # TO GET INITIAL SD?? WHY IS THIS MULTIPLIED
-#               for i in val_array:
-#                       n = min(n, (256*1024)-8)
-#                       #for j in range(n):
-#                       for k in range(8): #WHY IS THIS NOT INDEXED BY N (ADDING a counter, initially=n but after 256K just the # of samples, to the indexing)?
-#                               stddev_array[0] += val_array[k*2]**2
-#                               stddev_array[1] += val_array[(k*2) + 1]**2
-#                               print 'pre-sqrt:'
-#                               print stddev_array
-#                       stddev_array = [(f/n)**0.5 for f in stddev_array]
-#                       print stddev_array
-#                       pdb.set_trace()
-#
-#                       n+=8
-#
+                out_2u.tofile(output_file)
 #               pdb.set_trace()
 
-                output_file.write(bitted_string)        # write data block
+                #output_file.write(bitted_string)        # write data block
         fread.close()                   # close current file
 
 output_file.close()
