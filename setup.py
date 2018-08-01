@@ -23,7 +23,7 @@ class get_pybind_include(object):
 
 ext_modules = [
     Extension(
-        'python_example',
+        'requant_utils',
         ['src/main.cpp'],
         include_dirs=[
             # Path to pybind11 headers
@@ -90,12 +90,12 @@ class BuildExt(build_ext):
         build_ext.build_extensions(self)
 
 setup(
-    name='python_example',
+    name='requant_utils',
     version=__version__,
-    author='Sylvain Corlay',
-    author_email='sylvain.corlay@gmail.com',
-    url='https://github.com/pybind/python_example',
-    description='A test project using pybind11',
+    author='Danny Price and Sam Weissman',
+    author_email='dancpr@berkeley.edu',
+    url='https://github.com/telegraphic/requant_utils',
+    description='Requantization tools for Radio Astronomy',
     long_description='',
     ext_modules=ext_modules,
     install_requires=['pybind11>=2.2'],
