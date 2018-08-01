@@ -29,8 +29,10 @@ else:
         print 'enter raw file name\n'
         sys.exit()
 
+print fileinit
 all_filenames = sorted(glob.glob(fileinit))
 # print all_filenames
+print all_filenames
 
 fname = all_filenames[0]
 fread = open(fname,'rb')        # open first file of data set
@@ -171,11 +173,14 @@ for fname in all_filenames:
                         output_file.write(currline)
                 fread.seek(nblock*(nHeaderLines*80+nPadd+nblocsize)+nHeaderLines*80+nPadd+nChanOI*nChanSize)
 
+                # Read data, setup input and output arrays
                 in_8i  = np.fromfile(fread, count=int(nChanSize), dtype='int8')
                 out_2u = np.zeros(in_8i.shape[0] / 4, dtype='uint8')
-
+               
+                # Run requantization C++ code
                 requant_utils.requant_8i_2u(in_8i, out_2u)
-
+                
+                # Write to file
                 out_2u.tofile(output_file)
 #               pdb.set_trace()
 
