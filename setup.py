@@ -5,6 +5,7 @@ import setuptools
 
 __version__ = '0.0.2'
 
+NAME = 'bf_add_stuff'
 
 class get_pybind_include(object):
     """Helper class to determine the pybind11 include path
@@ -23,8 +24,8 @@ class get_pybind_include(object):
 
 ext_modules = [
     Extension(
-        'requant_utils',
-        ['src/main.cpp'],
+        NAME,
+        ['src/add_stuff.cpp'],
         include_dirs=[
             # Path to pybind11 headers
             get_pybind_include(),
@@ -90,12 +91,12 @@ class BuildExt(build_ext):
         build_ext.build_extensions(self)
 
 setup(
-    name='requant_utils',
+    name=NAME,
     version=__version__,
-    author='Danny Price and Sam Weissman',
+    author='Danny Price',
     author_email='dancpr@berkeley.edu',
-    url='https://github.com/telegraphic/requant_utils',
-    description='Requantization tools for Radio Astronomy',
+    url='https://github.com/ledatelescope/bifrost',
+    description='Bifrost plugin',
     long_description='',
     ext_modules=ext_modules,
     install_requires=['pybind11>=2.2'],
